@@ -1,13 +1,25 @@
-import './App.css';
+import React from 'react'
+
+// components
+import Navbar from './components/Navbar'
+import CurrentLoc from './components/CurrentLoc'
+
+// styles
+import './App.css'
 
 function App() {
   return (
+    <>
     <div className="App">
       <header className="App-header">
-      <h1>ISS app</h1>
+        <Navbar />
       </header>
+      <main className="App-main">
+        <CurrentLoc refreshMs={10000}/>
+      </main>
     </div>
+    </>
   );
 }
 
-export default App;
+export default App
