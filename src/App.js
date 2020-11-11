@@ -15,7 +15,7 @@ function App() {
         <Navbar />
       </header>
       <main className="App-main">
-        <CurrentLoc />
+        <CurrentLoc refreshMs={10000}/>
       </main>
     </div>
     </>
