@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react'
+import { getLocation } from '../utils/store' 
+
+// UI elements
 import CircularProgress from '@material-ui/core/CircularProgress'
 import Alert from '@material-ui/lab/Alert'
 import Button from '@material-ui/core/Button'
@@ -9,7 +12,7 @@ import './CurrentLoc.css'
 
 const CurrentLoc = (props) => {
 
-    const { refreshMs=10000 } = props
+    const { refreshMs = 10000 } = props
     const [time, setTime] = useState()
     const [lat, setLat] = useState()
     const [long, setLong] = useState()
@@ -18,14 +21,11 @@ const CurrentLoc = (props) => {
     const [hasError, setErrors] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
 
-    const url = 'http://api.open-notify.org/iss-now.json'
-
     const fetchData = async () => {
         if(!lat) setIsLoading(true)
 
         try {
-            await fetch(url)
-            .then(res => res.json())
+            await getLocation()
             .then(res => {
                 const timestamp = res.timestamp * 1000
                 const timeTxt =  new Date(timestamp).toLocaleString()
