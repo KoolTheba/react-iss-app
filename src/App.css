@@ -2,9 +2,6 @@
   text-align: left;
   min-height: 100vh;
   font-size: calc(10px + 2vmin);
-  background-color: #fcfbfe;
-}
-
-.App-main {
-  padding: 30px 50px;
+  background: #fcfbfe;
+  color: #1d1135;
 }

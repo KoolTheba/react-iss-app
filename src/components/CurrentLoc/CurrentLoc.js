@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { getLocation } from '../utils/store' 
+import { getLocation } from '../../utils/store' 
 
 // UI elements
 import CircularProgress from '@material-ui/core/CircularProgress'
