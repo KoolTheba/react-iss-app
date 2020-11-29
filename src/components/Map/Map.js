@@ -5,6 +5,9 @@ import {
     Popup
 } from 'react-leaflet'
 
+// styles
+import './Map.css'
+
 export default function Map (props) {
 
     const position = [props.lat, props.lon]
@@ -17,7 +20,11 @@ export default function Map (props) {
         />
         <Marker position={position}>
             <Popup>
-            You're HERE
+            You're here
+            <br/>
+            Lat: {props.lat}
+            <br/>
+            Lon: {props.lon}
             </Popup>
         </Marker>
         </MapContainer>
