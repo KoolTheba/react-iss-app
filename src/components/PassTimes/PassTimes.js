@@ -1,36 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 
-import { getPassTimes } from '../../utils/store';
+import { getPassTimes } from '../../utils/store'
+// import validator from '../../utils/validator'
 
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Alert from '@material-ui/lab/Alert';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
+// Material UI components
+import CircularProgress from '@material-ui/core/CircularProgress'
+import Alert from '@material-ui/lab/Alert'
+import Button from '@material-ui/core/Button'
+import TextField from '@material-ui/core/TextField'
+
+// components
+import TimesTable from '../TimesTable/TimesTable'
+import Map from '../Map/Map'
 
 // styles
 import './PassTimes.css'
 
 export default function PassTimes () {
 
-    const [lat, setLat] = useState();
-    const [lon, setLon] = useState();
-    const [coordsData, setCoordsData] = useState({});
-    const [hasError, setErrors] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [lat, setLat] = useState()
+    const [lon, setLon] = useState()
+    // const [isValidLat, setValidLat] = useState(false)
+    // const [isValidLon, setValidLon] = useState(false)
+    const [coordsData, setCoordsData] = useState({
+        lat: 0,
+        lon: 0,
+        views: []
+    })
+    const [hasError, setErrors] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const [isSubmitted, setIsSubmitted] = useState(false)
 
     const fetchData = async () => {
         setIsLoading(true)
         try {
-            const { response } = await getPassTimes(lat, lon)
-            console.log('DATA.RESPONSE', response)
-            setCoordsData(response)
+            const data = await getPassTimes(lat, lon)
+            console.log('DATA', data)
+            setCoordsData({
+                lat, 
+                lon,
+                views: data.response
+            })
             setIsLoading(false)
             setLat('')
             setLon('')
             setErrors(false)
-            setIsSubmitted(false)
-            console.log('COORDS', coordsData)
+            // setIsSubmitted(false)
         } catch (error) {
             setErrors(true)
         }
@@ -62,15 +77,14 @@ export default function PassTimes () {
         <div className='passtimes-main'>
         <h1>When can I see the ISS from my location? <span role='img' aria-label="image">🌍</span></h1>
         <h3>Please enter your latitude and longitude</h3>
-            <h4>Soy lat {lat}</h4>
-            <h4>Soy long {lon}</h4>
         <form
             onSubmit={handleSubmit}
             className={'latlong-form'}
             autoComplete="off">
             <div>
                 <TextField
-                    id="outlined-error-helper-text lat"
+                    required
+                    id="lat"
                     label="Latitude"
                     helperText="*Lat refs must be between [-90/+90]"
                     defaultValue=""
@@ -78,14 +92,18 @@ export default function PassTimes () {
                     placeholder="Latitude"
                     type="text"
                     name="lat"
-                    required
                     onChange={handleInputChange}
                     value={lat}
-                    min='-90'
-                    max='90'
                 />
+                {/* <TextField
+                        error
+                        id="outlined-error"
+                        label="Error"
+                        variant="outlined"
+                    />  */}
                 <TextField
-                    id="outlined-error-helper-text long"
+                    required
+                    id="long"
                     label="Longitude"
                     defaultValue=""
                     helperText="*Long refs must be between [-180/+180]"
@@ -93,11 +111,8 @@ export default function PassTimes () {
                     placeholder="Longitude"
                     type="text"
                     name="lon"
-                    required
                     onChange={handleInputChange}
                     value={lon}
-                    min='-180'
-                    max='180'
                 />
             </div>
             <Button
@@ -113,11 +128,23 @@ export default function PassTimes () {
             >Clear
         </Button>
         </form>
-        {isLoading && !hasError 
-            ? <><p>Fetching data...</p><CircularProgress /></> 
-            : null
-        }
-        {hasError ? <Alert severity="error">Something went wrong...clear and try again</Alert> : null}
+            {isLoading && !hasError 
+                ? <><CircularProgress /></> 
+                : null
+            }
+            {hasError ? <Alert severity="error">Something went wrong...clear and try again</Alert> : null}
+            {isSubmitted && coordsData && !isLoading
+                ?   <div className='map-area'>
+                        <p>The ISS is visible for you {coordsData.views.length} times!</p>
+                        <TimesTable timesInfo={coordsData.views}/>
+                        <Map 
+                            className='map-container'
+                            lat={coordsData.lat}
+                            lon={coordsData.lon}
+                        />
+                    </div>
+                : null
+            }
         </div>
         </>
     );
