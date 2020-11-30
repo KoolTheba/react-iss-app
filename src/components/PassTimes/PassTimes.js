@@ -1,7 +1,12 @@
 import React, { useState } from 'react'
 
 import { getPassTimes } from '../../utils/store'
-// import validator from '../../utils/validator'
+
+// hooks
+import useForm from '../../hooks/useForm'
+
+// utils
+import validate from '../../utils/formValidationRules'
 
 // Material UI components
 import CircularProgress from '@material-ui/core/CircularProgress'
@@ -18,10 +23,6 @@ import './PassTimes.css'
 
 export default function PassTimes () {
 
-    const [lat, setLat] = useState()
-    const [lon, setLon] = useState()
-    // const [isValidLat, setValidLat] = useState(false)
-    // const [isValidLon, setValidLon] = useState(false)
     const [coordsData, setCoordsData] = useState({
         lat: 0,
         lon: 0,
@@ -33,44 +34,32 @@ export default function PassTimes () {
 
     const fetchData = async () => {
         setIsLoading(true)
+        setCoordsData({
+            lat: 0,
+            lon: 0,
+            views: []
+        })
         try {
-            const data = await getPassTimes(lat, lon)
-            console.log('DATA', data)
+            const data = await getPassTimes(values.latitude, values.longitude)
             setCoordsData({
-                lat, 
-                lon,
+                lat: values.latitude, 
+                lon: values.longitude,
                 views: data.response
             })
             setIsLoading(false)
-            setLat('')
-            setLon('')
             setErrors(false)
-            // setIsSubmitted(false)
         } catch (error) {
             setErrors(true)
         }
     }
 
-    const handleInputChange = (e) => {
-        let { name, value } = e.target
-        e.persist()
-    
-        if(name === 'lat') setLat(value)
-        if(name === 'lon') setLon(value)
-    }
+    const { 
+        values,
+        errors,
+        handleChange,
+        handleSubmit
+      } = useForm(fetchData, validate)
 
-    const handleSubmit = (e) => {
-        if(e) e.preventDefault();
-        fetchData()
-    }
-
-    const handleClearParams = () => {
-        setLat('')
-        setLon('')
-        setErrors(false)
-        setIsLoading(false)
-        setIsSubmitted(false)
-    }
 
     return (
         <>
@@ -87,33 +76,31 @@ export default function PassTimes () {
                     id="lat"
                     label="Latitude"
                     helperText="*Lat refs must be between [-90/+90]"
-                    defaultValue=""
                     variant="outlined"
                     placeholder="Latitude"
                     type="text"
-                    name="lat"
-                    onChange={handleInputChange}
-                    value={lat}
+                    name="latitude"
+                    onChange={handleChange}
+                    value={values.latitude || ''}
                 />
-                {/* <TextField
-                        error
-                        id="outlined-error"
-                        label="Error"
-                        variant="outlined"
-                    />  */}
+                {errors.latitude && (
+                    <Alert severity="error">{errors.latitude}</Alert>
+                )}
                 <TextField
                     required
                     id="long"
                     label="Longitude"
-                    defaultValue=""
                     helperText="*Long refs must be between [-180/+180]"
                     variant="outlined"
                     placeholder="Longitude"
                     type="text"
-                    name="lon"
-                    onChange={handleInputChange}
-                    value={lon}
+                    name="longitude"
+                    onChange={handleChange}
+                    value={values.longitude || ''}
                 />
+                {errors.longitude && (
+                    <Alert severity="error">{errors.longitude}</Alert>
+                )}
             </div>
             <Button
                 variant="contained"
@@ -122,18 +109,13 @@ export default function PassTimes () {
                 onClick={() => setIsSubmitted(!isSubmitted)}
             >Check
             </Button>
-            <Button
-                variant="contained"
-                onClick={handleClearParams}
-            >Clear
-        </Button>
         </form>
             {isLoading && !hasError 
                 ? <><CircularProgress /></> 
                 : null
             }
             {hasError ? <Alert severity="error">Something went wrong...clear and try again</Alert> : null}
-            {isSubmitted && coordsData && !isLoading
+            {isSubmitted && !isLoading && coordsData.views.length > 0
                 ?   <div className='map-area'>
                         <p>The ISS is visible for you {coordsData.views.length} times!</p>
                         <TimesTable timesInfo={coordsData.views}/>
